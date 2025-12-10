@@ -19,19 +19,20 @@ public class HelloRobot_TeleOp extends LinearOpMode {
     private DcMotor rightFrontMotor;
     private DcMotor leftBackMotor;
     private DcMotor rightBackMotor;
-    private Servo test_servo;
+    private Servo feed_servo;
 
 
     @Override
 public void runOpMode() {
         control_Hub = hardwareMap.get(Blinker.class, "Control Hub");
-        accel = hardwareMap.get(DcMotor.class, "accel");
-        leftmotor = hardwareMap.get(DcMotor.class, "leftmotor");
-        rightmotor = hardwareMap.get(DcMotor.class, "rightmotor");
+        leftFrontMotor = hardwareMap.get(DcMotor.class, "leftFrontMotor");
+        leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
+        rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
+        rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
         feed_servo = hardwareMap.get(Servo.class, "feed_servo");
         
-        rightFrontmotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        rightBackmotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        rightBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         double x;
         double y;
         boolean trigger;
@@ -42,7 +43,6 @@ public void runOpMode() {
         waitForStart();
 
         while (opModeIsActive()) {
-
         
         trigger = gamepad1.a;
         x = gamepad1.left_stick_x;
@@ -55,10 +55,11 @@ public void runOpMode() {
         else{
             feed_servo.setPower(0);
         }
-        rightFrontMotor.setPower(y-x)-z;
-        leftFrontMotor.setPower(y-x)-z;
-        rightBackMotor.setPower(y+x)+z;
-        leftBackMotor.setPower(y+x)+z;
+        
+        rightFrontMotor.setPower(y-x-z);
+        leftFrontMotor.setPower(y-x-z);
+        rightBackMotor.setPower(y+x+z);
+        leftBackMotor.setPower(y+x+z);
         
         telemetry.addData("Status", "Running");
         telemetry.update();
