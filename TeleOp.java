@@ -19,7 +19,15 @@ public class HelloRobot_TeleOp extends LinearOpMode {
     private DcMotor rightFrontMotor;
     private DcMotor leftBackMotor;
     private DcMotor rightBackMotor;
-    private Servo feed_servo;
+    private Servo feedServo;
+    private DcMotor guideMotor;
+    private DcMotor accelMotor;
+
+    boolean dpad_upPrevious = true;
+    boolean dpad_downPrevious = true;
+
+    private double guideSpeed = 0.2;
+    private double accelSpeed = 0.8
 
 
     @Override
@@ -29,13 +37,18 @@ public void runOpMode() {
         leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
         rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
         rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
-        feed_servo = hardwareMap.get(Servo.class, "feed_servo");
+        feedServo = hardwareMap.get(Servo.class, "feedServo");//NEED TEST
+        guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");//NEED ADD
+        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");//NEED ADD
+
         
         rightFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         double x;
         double y;
         boolean trigger;
+        boolean armGuide;
+        boolean armAccel;
         
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -43,18 +56,25 @@ public void runOpMode() {
         waitForStart();
 
         while (opModeIsActive()) {
+
+        if (gamaepad1.dpad_up == false && dpad_upPrevious == true){armGuide = !armGuide;}
+        dpad_upPrevious = gamaepad1.dpad_up;
+        if (gamaepad1.dpad_down == false && dpad_downPrevious == true){armAccel = !armAccel;}
+        dpad_downPrevious = gamaepad1.dpad_down;
         
         trigger = gamepad1.a;
         x = gamepad1.left_stick_x;
         y = -gamepad1.left_stick_y - gamepad1.right_stick_y;
         z = gamaepad1.right_stick_x;
+
+        if (armGuide){guideMotor.setPower(guideSpeed);}
+        else{guideMotor.setPower(0);}
+
+        if (armAccel){accelMotor.setPower(accelSpeed);}
+        else{accelMotor.setPower(0);}
         
-        if (trigger){
-            feed_servo.setPower(1);
-        }
-        else{
-            feed_servo.setPower(0);
-        }
+        if (trigger){feedServo.setPower(1);}
+        else{feedServo.setPower(0);}
         
         rightFrontMotor.setPower(y-x-z);
         leftFrontMotor.setPower(y-x-z);
