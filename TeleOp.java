@@ -41,9 +41,9 @@ public void runOpMode() {
         leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
         rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
         rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
-        feedServo = hardwareMap.get(CRServo.class, "feedServo");//NEED TEST
-        guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");//NEED ADD
-        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");//NEED ADD
+        feedServo = hardwareMap.get(CRServo.class, "feedServo");//CHANGE TO CR
+        guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");
+        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");
 
         
         rightFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -51,6 +51,9 @@ public void runOpMode() {
         double x;
         double y;
         double z;
+        double theta, power;
+        double sin, cos, max;
+        double LF, RF, LB, RB;
         
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -66,8 +69,20 @@ public void runOpMode() {
         
         trigger = gamepad1.a;
         x = gamepad1.left_stick_x;
-        y = -gamepad1.left_stick_y - gamepad1.right_stick_y;
+        y = -gamepad1.left_stick_y;
         z = gamepad1.right_stick_x;
+
+        theta = Math.atan2(y, x);
+        power = Math.hypot(x, y);
+
+        sin = Math.sin(theta - Math.PI/4);
+        cos = Math.cos(theta - Math.PI/4);
+        max = Math.max(Math.abs(sin), Math.abs(cos));
+
+        LF = power * cos/max + z;
+        RF = power * sin/max - z;
+        LB = power * sin/max + z;
+        RB = power * cos/max - z;
 
         if (armGuide){guideMotor.setPower(guideSpeed);}
         else{guideMotor.setPower(0);}
@@ -78,10 +93,10 @@ public void runOpMode() {
         if (trigger){feedServo.setPower(1);}
         else{feedServo.setPower(0);}
         
-        rightFrontMotor.setPower(y-x-z);
-        leftFrontMotor.setPower(y-x-z);
-        rightBackMotor.setPower(y+x+z);
-        leftBackMotor.setPower(y+x+z);
+        rightFrontMotor.setPower(RF);
+        leftFrontMotor.setPower(LF);
+        rightBackMotor.setPower(RB);
+        leftBackMotor.setPower(LB);
         
         telemetry.addData("Status", "Running");
         telemetry.addData("GuideMotor", armGuide);
