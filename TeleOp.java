@@ -102,7 +102,13 @@ public void runOpMode() {
         telemetry.addData("GuideMotor", armGuide);
         telemetry.addData("Accelorator", armAccel);
         telemetry.addData("Trigger", trigger);
+        telemetry.addData("");
+        telemetry.addData("LF", LF)
+        telemetry.addData("RF", RF)
+        telemetry.addData("LB", BF)
+        telemetry.addData("RB", RB)
         telemetry.update();
         }
     }
 }
+
