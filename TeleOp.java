@@ -1,93 +1,129 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.CRServo;
-import com.qualcomm.robotcore.hardware.Blinker;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.hardware.TouchSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.util.AngleUnit;
 
-@TeleOp
-
+@TeleOp(name = "LAE TeleOp 2026 (Field Centric)")
 public class LAETeleop2026 extends LinearOpMode {
-    private Blinker control_Hub;
-    private DcMotor arm;
+
     private DcMotor leftFrontMotor;
     private DcMotor rightFrontMotor;
     private DcMotor leftBackMotor;
     private DcMotor rightBackMotor;
-    private CRServo feedServo;
+
     private DcMotor guideMotor;
     private DcMotor accelMotor;
+    private CRServo feedServo;
 
-    boolean dpad_upPrevious = false;
-    boolean dpad_downPrevious = false;
-    boolean trigger = false;
+    private IMU imu;
+
+    boolean dpadUpPrev = false;
+    boolean dpadDownPrev = false;
     boolean armGuide = false;
     boolean armAccel = false;
 
-    private double guideSpeed = -0.5;
-    private double accelSpeed = 0.8;
+    double guideSpeed = -0.5;
+    double accelSpeed = 0.8;
+
+    double fastSpeed = 1.0;
+    double slowSpeed = 0.4;
 
     @Override
-    
-public void runOpMode() {
-        control_Hub = hardwareMap.get(Blinker.class, "Control Hub");
+    public void runOpMode() {
+
         leftFrontMotor = hardwareMap.get(DcMotor.class, "leftFrontMotor");
         leftBackMotor = hardwareMap.get(DcMotor.class, "leftBackMotor");
-        rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
         rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
-        feedServo = hardwareMap.get(CRServo.class, "feedServo");//NEED TEST
-        guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");//NEED ADD
-        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");//NEED ADD
+        rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
 
-        
+        guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");
+        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");
+        feedServo = hardwareMap.get(CRServo.class, "feedServo");
+
+        imu = hardwareMap.get(IMU.class, "IMU");
+
         rightFrontMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightBackMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        double x;
-        double y;
-        double z;
-        
-        telemetry.addData("Status", "Initialized");
+
+        leftFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        guideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        accelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        imu.resetYaw();
+
+        telemetry.addLine("Status: Initialized");
+        telemetry.addLine("Press START");
         telemetry.update();
 
         waitForStart();
 
         while (opModeIsActive()) {
 
-        if (gamepad1.dpad_up == false && dpad_upPrevious == true){armGuide = !armGuide;}
-        dpad_upPrevious = gamepad1.dpad_up;
-        if (gamepad1.dpad_down == false && dpad_downPrevious == true){armAccel = !armAccel;}
-        dpad_downPrevious = gamepad1.dpad_down;
-        
-        trigger = gamepad1.a;
-        x = gamepad1.left_stick_x;
-        y = -gamepad1.left_stick_y - gamepad1.right_stick_y;
-        z = gamepad1.right_stick_x;
+            if (!gamepad1.dpad_up && dpadUpPrev) {armGuide = !armGuide;}
+            dpadUpPrev = gamepad1.dpad_up;
 
-        if (armGuide){guideMotor.setPower(guideSpeed);}
-        else{guideMotor.setPower(0);}
+            if (!gamepad1.dpad_down && dpadDownPrev) {armAccel = !armAccel;}
+            dpadDownPrev = gamepad1.dpad_down;
 
-        if (armAccel){accelMotor.setPower(accelSpeed);}
-        else{accelMotor.setPower(0);}
-        
-        if (trigger){feedServo.setPower(1);}
-        else{feedServo.setPower(0);}
-        
-        rightFrontMotor.setPower(y-x-z);
-        leftFrontMotor.setPower(y-x-z);
-        rightBackMotor.setPower(y+x+z);
-        leftBackMotor.setPower(y+x+z);
-        
-        telemetry.addData("Status", "Running");
-        telemetry.addData("GuideMotor", armGuide);
-        telemetry.addData("Accelorator", armAccel);
-        telemetry.addData("Trigger", trigger);
-        telemetry.update();
+            double driveSpeed = fastSpeed;
+            if (gamepad1.left_bumper) driveSpeed = slowSpeed;
+            if (gamepad1.right_bumper) driveSpeed = fastSpeed;
+
+            double y = -gamepad1.left_stick_y;
+            double x = gamepad1.left_stick_x;
+            double z = gamepad1.right_stick_x;
+
+            // Deadzone
+            double deadzone = 0.05;
+            y = Math.abs(y) > deadzone ? y : 0;
+            x = Math.abs(x) > deadzone ? x : 0;
+            z = Math.abs(z) > deadzone ? z : 0;
+
+            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+
+            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+            double rf = rotY + rotX - z;
+            double lf = rotY - rotX - z;
+            double rb = rotY - rotX + z;
+            double lb = rotY + rotX + z;
+
+            double max = Math.max(1.0,
+                    Math.max(Math.abs(rf),
+                    Math.max(Math.abs(lf),
+                    Math.max(Math.abs(rb), Math.abs(lb)))));
+
+            rf /= max;
+            lf /= max;
+            rb /= max;
+            lb /= max;
+
+            rightFrontMotor.setPower(rf * driveSpeed);
+            leftFrontMotor.setPower(lf * driveSpeed);
+            rightBackMotor.setPower(rb * driveSpeed);
+            leftBackMotor.setPower(lb * driveSpeed);
+
+            guideMotor.setPower(armGuide ? guideSpeed : 0);
+            accelMotor.setPower(armAccel ? accelSpeed : 0);
+            feedServo.setPower(gamepad1.a ? 1 : 0);
+
+            telemetry.addData("Drive Mode:", driveSpeed == fastSpeed ? "FAST" : "SLOW");
+            telemetry.addData("Heading:", Math.toDegrees(botHeading));
+            telemetry.addData("Left Stick:", "x: %.2f y: %.2f", x, y);
+            telemetry.addData("Rotate:", "%.2f", z);
+            telemetry.addData("Guide Motor:", armGuide ? "ARMED" : "IDLE");
+            telemetry.addData("Accel Motor:", armAccel ? "ARMED" : "IDLE");
+            telemetry.addData("Feed Servo:", gamepad1.a ? "ARMED" : "IDLE");
+            telemetry.update();
         }
     }
 }
