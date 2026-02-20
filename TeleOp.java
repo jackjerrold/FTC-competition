@@ -8,8 +8,18 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.util.AngleUnit;
 
-@TeleOp(name = "LAE TeleOp 2026 (Field Centric)")
+@TeleOp(name = "LAET TeleOp 2026")
 public class LAETeleop2026 extends LinearOpMode {
+
+    //Left stick	Field-centric movement
+    //Right stick   rotation
+    //Right bumper	FAST mode
+    //Left bumper	SLOW mode
+    //X	            Reset IMU heading
+    //Y	            Heading lock 
+    //D-pad UP	    Toggle guide motor
+    //D-pad DOWN	Toggle accelerator
+    //A	            Feed servo
 
     private DcMotor leftFrontMotor;
     private DcMotor rightFrontMotor;
@@ -127,3 +137,4 @@ public class LAETeleop2026 extends LinearOpMode {
         }
     }
 }
+
