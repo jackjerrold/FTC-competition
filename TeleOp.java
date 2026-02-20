@@ -78,9 +78,9 @@ public void runOpMode() {
         if (trigger){feedServo.setPower(1);}
         else{feedServo.setPower(0);}
         
-        rightFrontMotor.setPower(y-x-z);
+        rightFrontMotor.setPower(y+x-z);
         leftFrontMotor.setPower(y-x-z);
-        rightBackMotor.setPower(y+x+z);
+        rightBackMotor.setPower(y-x+z);
         leftBackMotor.setPower(y+x+z);
         
         telemetry.addData("Status", "Running");
@@ -91,3 +91,4 @@ public void runOpMode() {
         }
     }
 }
+
