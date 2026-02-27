@@ -42,7 +42,7 @@ public class LAETeleop2026 extends LinearOpMode {
     boolean armAccel = false;
 
     double guideSpeed = -0.5;
-    double accelSpeed = 1;
+    double accelSpeed = 1600;
     double fastSpeed = 1.0;
     double slowSpeed = 0.4;
     double driveSpeed;
@@ -76,6 +76,9 @@ public class LAETeleop2026 extends LinearOpMode {
         leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        accelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        shooter.setVelocityPIDFCoefficients(5, 0, 0, 12);
 
         imu.resetYaw();
 
@@ -152,7 +155,7 @@ public class LAETeleop2026 extends LinearOpMode {
             leftBackMotor.setPower(lb * driveSpeed);
 
             guideMotor.setPower(armGuide ? guideSpeed : 0);
-            accelMotor.setPower(armAccel ? accelSpeed : 0);
+            accelMotor.setVelocity(armAccel ? accelSpeed : 0);
             feedServo.setPosition(gamepad1.a ? 1 : 0);
 
             telemetry.addData("Drive Mode:", !parkMode ? "FAST" : "SLOW");
@@ -165,3 +168,4 @@ public class LAETeleop2026 extends LinearOpMode {
         }
     }
 }
+
