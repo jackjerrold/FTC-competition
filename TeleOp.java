@@ -78,7 +78,7 @@ public class LAETeleop2026 extends LinearOpMode {
         rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         accelMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        shooter.setVelocityPIDFCoefficients(5, 0, 0, 12);
+        accelMotor.setVelocityPIDFCoefficients(5, 0, 0, 12);
 
         imu.resetYaw();
 
@@ -168,4 +168,5 @@ public class LAETeleop2026 extends LinearOpMode {
         }
     }
 }
+
 
