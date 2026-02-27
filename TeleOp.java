@@ -2,7 +2,7 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.Blinker;
-import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -30,7 +30,7 @@ public class LAETeleop2026 extends LinearOpMode {
     private DcMotor rightBackMotor;
 
     private DcMotor guideMotor;
-    private DcMotor accelMotor;
+    private DcMotorEx accelMotor;
     private Servo feedServo;
 
     private IMU imu;
@@ -65,7 +65,7 @@ public class LAETeleop2026 extends LinearOpMode {
 
         feedServo = hardwareMap.get(Servo.class, "feedServo");
         guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");
-        accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");
+        accelMotor = hardwareMap.get(DcMotorEx.class, "accelMotor");
 
         imu = hardwareMap.get(IMU.class, "IMU");
 
@@ -168,5 +168,6 @@ public class LAETeleop2026 extends LinearOpMode {
         }
     }
 }
+
 
 
