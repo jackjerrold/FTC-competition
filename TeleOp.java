@@ -1,22 +1,28 @@
+package org.firstinspires.ftc.teamcode;
+
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.Blinker;
+import com.qualcomm.robotcore.hardware.CRServo;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.util.AngleUnit;
 
 @TeleOp(name = "LAET TeleOp 2026")
 public class LAETeleop2026 extends LinearOpMode {
 
-    //Left stick	movement
+    //Left stick    movement
     //Right stick   rotation
-    //Left bumper	Speed mode
-    //X	            Reset IMU heading
-    //Y	            Heading lock 
-    //D-pad UP	    Arm guide motor
-    //D-pad DOWN	Arm accelerator
-    //A	            Arm feed servo
+    //Left bumper    Speed mode
+    //Square        Reset IMU heading
+    //Triangle      Heading lock 
+    //D-pad UP        Arm guide motor
+    //D-pad DOWN    Arm accelerator
+    //X              Arm feed servo
+
+    private Blinker control_Hub;
 
     private DcMotor leftFrontMotor;
     private DcMotor rightFrontMotor;
@@ -36,7 +42,7 @@ public class LAETeleop2026 extends LinearOpMode {
     boolean armAccel = false;
 
     double guideSpeed = -0.5;
-    double accelSpeed = 0.8;
+    double accelSpeed = 1;
     double fastSpeed = 1.0;
     double slowSpeed = 0.4;
     double driveSpeed;
@@ -47,7 +53,7 @@ public class LAETeleop2026 extends LinearOpMode {
     double kP = 0.015;
 
     double smoothFactor = 0.15;
-    double prevX = 0, prevY = 0, prevZ = 0
+    double prevX = 0, prevY = 0, prevZ = 0;
 
     @Override
     public void runOpMode() {
@@ -57,9 +63,9 @@ public class LAETeleop2026 extends LinearOpMode {
         rightFrontMotor = hardwareMap.get(DcMotor.class, "rightFrontMotor");
         rightBackMotor = hardwareMap.get(DcMotor.class, "rightBackMotor");
 
+        feedServo = hardwareMap.get(Servo.class, "feedServo");
         guideMotor = hardwareMap.get(DcMotor.class, "guideMotor");
         accelMotor = hardwareMap.get(DcMotor.class, "accelMotor");
-        feedServo = hardwareMap.get(CRServo.class, "feedServo");
 
         imu = hardwareMap.get(IMU.class, "IMU");
 
@@ -70,8 +76,6 @@ public class LAETeleop2026 extends LinearOpMode {
         leftBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightFrontMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        guideMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        accelMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         imu.resetYaw();
 
@@ -96,7 +100,7 @@ public class LAETeleop2026 extends LinearOpMode {
             if (gamepad1.x) imu.resetYaw();
 
             double y = -gamepad1.left_stick_y;
-            double x = gamepad1.left_stick_x;
+            double x = -gamepad1.left_stick_x;
             double z = gamepad1.right_stick_x;
 
             double dz = 0.05;
@@ -111,26 +115,26 @@ public class LAETeleop2026 extends LinearOpMode {
             if (gamepad1.y && !headingLock)
             {
                 headingLock = true;
-                lockedHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                lockedHeading = imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS) + Math.PI/2;
             }
             else if (!gamepad1.y) {headingLock = false;}
 
             if (headingLock) 
             {
-                double currentHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+                double currentHeading = imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS) + Math.PI/2;
                 double error = lockedHeading - currentHeading;
                 z = error * kP;
             }
 
-            double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
+            double botHeading = imu.getRobotYawPitchRollAngles().getPitch(AngleUnit.RADIANS) + Math.PI/2;
 
             double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
             double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
 
-            double rf = rotY + rotX - z;
+            double rf = rotY + rotX + z;
             double lf = rotY - rotX - z;
             double rb = rotY - rotX + z;
-            double lb = rotY + rotX + z;
+            double lb = rotY + rotX - z;
 
             double max = Math.max(1.0,
                     Math.max(Math.abs(rf),
